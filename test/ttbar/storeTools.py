@@ -8,27 +8,27 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms//eos/cms'):
     from subprocess import Popen, PIPE
     print 'looking into: '+directory+'...'
 
-    eos_cmd = '/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select'
-    data = Popen([eos_cmd, 'ls', '/eos/cms/'+directory],stdout=PIPE)
-    out,err = data.communicate()
-
+    #eos_cmd = '/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select'
+    eos_dir = '/eos/cms/%s'%(directory)
+    eos_cmd = 'eos ' + prepend + ' ls ' + eos_dir
+    #data = Popen([eos_cmd, 'ls', '/eos/cms/'+directory],stdout=PIPE)
+    #out,err = data.communicate()
+    out = commands.getoutput(eos_cmd)
     full_list = []
-
     ## if input file was single root file:
     if directory.endswith('.root'):
         if len(out.split('\n')[0]) > 0:
             return [prepend + directory]
-
     ## instead of only the file name append the string to open the file in ROOT
     for line in out.split('\n'):
+        print 'line: ', line
         if len(line.split()) == 0: continue
-        full_list.append(prepend + directory + '/' + line)
-
+        full_list.append(os.path.join(prepend,eos_dir,line).replace(" ",""))
     ## strip the list of files if required
     if mask != '':
         stripped_list = [x for x in full_list if mask in x]
         return stripped_list
-
+    print 'full files list from eos: ', full_list
     ## return
     return full_list
 
