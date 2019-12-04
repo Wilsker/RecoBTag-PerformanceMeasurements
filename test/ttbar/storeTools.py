@@ -12,14 +12,16 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms//eos/cms'):
     #eos_cmd = '/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select'
     eos_dir = '/eos/cms/%s'%(directory)
     eos_cmd = 'eos ' + prepend + ' ls ' + eos_dir
+    print 'eos_cmd: ', eos_cmd
     #data = Popen([eos_cmd, 'ls', '/eos/cms/'+directory],stdout=PIPE)
     #out,err = data.communicate()
     out = commands.getoutput(eos_cmd)
+    print 'out: ', out
     full_list = []
     ## if input file was single root file:
     if directory.endswith('.root'):
         if len(out.split('\n')[0]) > 0:
-            return [prepend + directory]
+            return [os.path.join(prepend,eos_dir).replace(" ","")]
     ## instead of only the file name append the string to open the file in ROOT
     for line in out.split('\n'):
         print 'line: ', line
