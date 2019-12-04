@@ -105,35 +105,6 @@ class TTbarEventAnalysis
       fIn->Close();
   }
 
-  void SetPUWeightTarget(TString targetFile,TString sampleName){
-
-        TFile *fIn=TFile::Open(targetFile);
-  	    if(fIn){
-          std::string nom("puwgts_nom");
-          std::string up("puwgts_down");
-          std::string down("puwgts_up");
-          if(!sampleName.IsNull()){
-              nom.append("_");
-              nom.append(sampleName);
-              up.append("_");
-              up.append(sampleName);
-              down.append("_");
-              down.append(sampleName);
-          }
-          else{
-            std::cout << "Warning: PUWeight target histogram " << sampleName << " does not exist. Check naming convention of samples matches that of PU histograms." << std::endl;
-          }
-
-  	      puWgtGr_     = (TGraph *)fIn->Get(nom.c_str());
-  	      puWgtDownGr_ = (TGraph *)fIn->Get(down.c_str());
-  	      puWgtUpGr_   = (TGraph *)fIn->Get(up.c_str());
-  	    }
-        else{
-  	      std::cout << "Unable to find pileupWgts.root, no PU reweighting will be applied" << std::endl;
-  	    }
-  	    fIn->Close();
-  	}
-
  private:
   JetCorrectionUncertainty *jecUnc_;
   std::pair<float,float> getTriggerEfficiency(int id1,float pt1,float eta1,int id2,float pt2,float eta2,int ch);
