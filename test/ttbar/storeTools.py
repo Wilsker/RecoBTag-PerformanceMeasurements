@@ -8,13 +8,9 @@ Takes a directory on eos (starting from /store/...) and returns a list of all fi
 def getEOSlslist(directory, mask='', prepend='root://eoscms.cern.ch'):
     from subprocess import Popen, PIPE
     print 'looking into: '+directory+'...'
-
-    #eos_cmd = '/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select'
     eos_dir = '/eos/cms/%s'%(directory)
     eos_cmd = 'eos ' + prepend + ' ls ' + eos_dir
     print 'eos_cmd: ', eos_cmd
-    #data = Popen([eos_cmd, 'ls', '/eos/cms/'+directory],stdout=PIPE)
-    #out,err = data.communicate()
     out = commands.getoutput(eos_cmd)
     full_list = []
     ## if input file was single root file:
@@ -56,7 +52,6 @@ def produceNormalizationCache(samplesList,inDir,cache,xsecWgts,integLumi):
         xsec=sample[0]
         norigEvents=None
         for f in input_list:
-            print 'f: ', f
             fIn=ROOT.TFile.Open(f)
             if norigEvents is None:
                 norigEvents=fIn.Get('ttbarselectionproducer/wgtcounter').Clone('xsecwgts')
