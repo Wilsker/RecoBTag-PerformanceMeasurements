@@ -16,7 +16,6 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms.cern.ch'):
     #data = Popen([eos_cmd, 'ls', '/eos/cms/'+directory],stdout=PIPE)
     #out,err = data.communicate()
     out = commands.getoutput(eos_cmd)
-    print 'out: ', out
     full_list = []
     ## if input file was single root file:
     if directory.endswith('.root'):
@@ -24,14 +23,13 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms.cern.ch'):
             return [os.path.join(prepend,eos_dir).replace(" ","")]
     ## instead of only the file name append the string to open the file in ROOT
     for line in out.split('\n'):
-        print 'line: ', line
         if len(line.split()) == 0: continue
         full_list.append(os.path.join(prepend,eos_dir,line).replace(" ",""))
     ## strip the list of files if required
     if mask != '':
         stripped_list = [x for x in full_list if mask in x]
         return stripped_list
-    print 'full files list from eos: ', full_list
+    #print 'full files list from eos: ', full_list
     ## return
     return full_list
 
@@ -51,7 +49,6 @@ def produceNormalizationCache(samplesList,inDir,cache,xsecWgts,integLumi):
             print '[Warning] won\'t override current definition for',tag,'. Use --resetCache option to override'
             continue
 
-
         input_list=getEOSlslist(directory=inDir+'/'+tag)
         # Set cross-section to value in samples json.
         # To run the non-tt normalisation xsection uncertainty, multiply the xsec for non-tt backgrounds by 30%.
@@ -59,6 +56,7 @@ def produceNormalizationCache(samplesList,inDir,cache,xsecWgts,integLumi):
         xsec=sample[0]
         norigEvents=None
         for f in input_list:
+            print 'f: ', f
             fIn=ROOT.TFile.Open(f)
             if norigEvents is None:
                 norigEvents=fIn.Get('ttbarselectionproducer/wgtcounter').Clone('xsecwgts')
