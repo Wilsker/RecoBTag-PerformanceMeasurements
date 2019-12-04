@@ -1,6 +1,7 @@
 import ROOT
 import pickle
 import commands
+import os
 """
 Takes a directory on eos (starting from /store/...) and returns a list of all files with 'prepend' prepended
 """
