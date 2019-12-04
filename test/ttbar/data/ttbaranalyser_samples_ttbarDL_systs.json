@@ -1,0 +1,8 @@
+{
+  "MC13TeV_TTJets_DL_mtop171p5" : [87.31,   0, "/TTTo2L2Nu_mtop171p5_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1],
+  "MC13TeV_TTJets_DL_mtop173p5" : [87.31,   0, "/TTTo2L2Nu_mtop173p5_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1],
+  "MC13TeV_TTJets_DL_hdampDOWN" : [87.31,   0, "/TTTo2L2Nu_hdampDOWN_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1],
+  "MC13TeV_TTJets_DL_hdampUP" : [87.31,   0, "/TTTo2L2Nu_hdampUP_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1],
+  "MC13TeV_TTJets_DL_TuneCP5down" : [87.31,   0, "/TTTo2L2Nu_TuneCP5down_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1],
+  "MC13TeV_TTJets_DL_TuneCP5up" : [87.31,   0, "/TTTo2L2Nu_TuneCP5up_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1]
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUTFILE="analysis/MC13TeV_TTJets.root"
+INPUTFILE="UltraLegacy_2018Data/combined_files/MC13TeV_TTJets_training_combined.root"
 
 a=(0 1 2)
 for i in ${a[@]}; do

@@ -23,10 +23,10 @@ def runTTbarAnalysis(inFile, outFile, wgt, tmvaWgts=None,isData=False):
     if 'TTJets' in inFile: evAnalysis.setReadTTJetsGenWeights(True)
 
     if isData:
-        if 'MuonEG'   in inFile : 
+        if 'MuonEG'   in inFile :
             evAnalysis.addTriggerBit(0,-11*13)
             evAnalysis.addTriggerBit(1,-11*13)
-        if 'DoubleElectron' in inFile : 
+        if 'DoubleElectron' in inFile :
             evAnalysis.addTriggerBit(2,-11*11)
         if 'DoubleMuon' in inFile :
             evAnalysis.addTriggerBit(3,-13*13)
@@ -39,12 +39,19 @@ def runTTbarAnalysis(inFile, outFile, wgt, tmvaWgts=None,isData=False):
 
     for v in ['close_mlj[0]', 'close_dphi', 'close_deta', 'close_lj2ll_dphi', 'close_lj2ll_deta',
               'far_mlj',      'far_dphi',   'far_deta',   'far_lj2ll_dphi',   'far_lj2ll_deta',
-              'j2ll_dphi',    'j2ll_deta']: 
-        evAnalysis.addVarForTMVA(ROOT.TString(v))    
+              'j2ll_dphi',    'j2ll_deta']:
+        evAnalysis.addVarForTMVA(ROOT.TString(v))
     if not (tmvaWgts is None) : evAnalysis.setTMVAWeightsBaseDir(tmvaWgts)
     evAnalysis.prepareOutput(ROOT.TString(outFile))
-    evAnalysis.processFile(ROOT.TString(inFile),wgt,isData)
-    evAnalysis.finalizeOutput()
+    print 'Checking file %s is good . . .' % (ROOT.TString(inFile))
+    print 'wgt: ', wgt
+    print 'isData: ', isData
+    file_good = evAnalysis.processFile(ROOT.TString(inFile),wgt,isData)
+    if file_good == 1:
+        print 'file_good == 1 (is good)'
+        evAnalysis.finalizeOutput()
+    else:
+        print 'file_good == 0 (not good)'
 
 """
 Wrapper to be used when run in parallel
@@ -77,11 +84,11 @@ def main():
     parser.add_option('-n', '--njobs',       dest='njobs',       help='# jobs to run in parallel',    default=0,           type='int')
     (opt, args) = parser.parse_args()
 
-    #compile c++ wrapper to run over trees 
+    #compile c++ wrapper to run over trees
     ROOT.gSystem.Load("libJetMETCorrectionsObjects.so")
     ROOT.gSystem.CompileMacro("TTbarEventAnalysis.cc","fkgd","libTTbarEventAnalysis");
     ROOT.gSystem.Load("libTTbarEventAnalysis.so")
-    
+
     #read list of samples
     jsonFile = open(opt.json,'r')
     samplesList=json.load(jsonFile,encoding='utf-8').items()
@@ -91,7 +98,7 @@ def main():
     if len(opt.outDir) : os.system('mkdir -p %s' % opt.outDir)
 
     #only list
-    onlyList=opt.only.split(',')    
+    onlyList=opt.only.split(',')
 
     #read normalization
     xsecWgts, integLumi = {}, {}
@@ -100,7 +107,7 @@ def main():
         cachefile = open(cache, 'r')
         xsecWgts  = pickle.load(cachefile)
         integLumi = pickle.load(cachefile)
-        cachefile.close()        
+        cachefile.close()
         print 'Normalization read from cache (%s)' % cache
 
         for tag,sample in samplesList:
@@ -111,7 +118,6 @@ def main():
         print '(Re-)Computing original number of events and storing in cache, this may take a while if it\'s the first time'
         print 'Current cache contains already %d processes'%len(xsecWgts)
         xsecWgts, integLumi = produceNormalizationCache(samplesList=samplesList,inDir=opt.inDir,cache=cache, xsecWgts=xsecWgts, integLumi=integLumi)
-
 
     #DY scale factor
     if opt.dyScale:
@@ -139,7 +145,7 @@ def main():
         runTags.append(tag)
         input_list=getEOSlslist(directory=opt.inDir+'/'+tag)
         wgt = xsecWgts[tag]
-        for nf in xrange(0,len(input_list)) : 
+        for nf in xrange(0,len(input_list)) :
             outF='%s/%s_%d.root'%(opt.outDir,tag,nf)
             task_list.append( (input_list[nf], outF, wgt, opt.tmvaWgts, sample[1]) )
 
@@ -148,7 +154,7 @@ def main():
 
     #run the analysis jobs
     if opt.njobs == 0:
-        for inFile, outFile,wgt, tmvaWgts,isData in task_list: 
+        for inFile, outFile,wgt, tmvaWgts,isData in task_list:
             runTTbarAnalysis(inFile=inFile, outFile=outFile, wgt=wgt, tmvaWgts=tmvaWgts, isData=isData)
     else:
         from multiprocessing import Pool
@@ -156,9 +162,9 @@ def main():
         pool.map(runTTbarAnalysisPacked, task_list)
 
     #merge the outputs
-    for tag in runTags:
-        os.system('hadd -f %s/%s.root %s/%s_*.root' % (opt.outDir,tag,opt.outDir,tag) )
-        os.system('rm %s/%s_*.root' % (opt.outDir,tag) )
+    #for tag in runTags:
+    #    os.system('hadd -f %s/%s.root %s/%s_*.root' % (opt.outDir,tag,opt.outDir,tag) )
+    #    os.system('rm %s/%s_*.root' % (opt.outDir,tag) )
     print 'Analysis results are available in %s' % opt.outDir
 
     #all done here

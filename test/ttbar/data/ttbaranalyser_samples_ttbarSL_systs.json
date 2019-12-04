@@ -1,0 +1,8 @@
+{
+  "MC13TeV_TTJets_SL_mtop171p5" : [364.35,   0, "/TTToSemiLeptonic_mtop171p5_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} SL",          920, false, false, 1],
+  "MC13TeV_TTJets_SL_mtop173p5" : [364.35,   0, "/TTToSemiLeptonic_mtop173p5_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} SL",          920, false, false, 1],
+  "MC13TeV_TTJets_SL_hdampDOWN" : [364.35,   0, "/TTToSemiLeptonic_hdampDOWN_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} SL",          920, false, false, 1],
+  "MC13TeV_TTJets_SL_hdampUP"   : [364.35,   0, "/TTToSemiLeptonic_hdampUP_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} SL",          920, false, false, 1],
+  "MC13TeV_TTJets_SL_TuneCP5down" : [364.35,   0, "/TTToSemiLeptonic_TuneCP5down_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} SL",          920, false, false, 1],
+  "MC13TeV_TTJets_SL_TuneCP5up" : [364.35,   0, "/TTToSemiLeptonic_TuneCP5up_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} SL",          920, false, false, 1]
+}

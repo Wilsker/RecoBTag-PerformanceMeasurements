@@ -27,29 +27,46 @@ bool sortLJKinematicsByDR (LJKinematics_t i,LJKinematics_t j) { return (i.dr<j.d
 class TTbarEventAnalysis
 {
  public:
- TTbarEventAnalysis() : 
+ TTbarEventAnalysis() :
     tmvaReader_(0),
-    readTTJetsGenWeights_(false),   
+    readTTJetsGenWeights_(false),
     puWgtGr_(0),puWgtDownGr_(0),puWgtUpGr_(0)
       {
 	//jet uncertainty parameterization
-	TString jecUncUrl("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/Summer15_25nsV5_DATA_Uncertainty_AK4PFchs.txt");
+	TString jecUncUrl("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/Autumn18_V8_MC_Uncertainty_AK4PF.txt");
 	gSystem->ExpandPathName(jecUncUrl);
 	jecUnc_ = new JetCorrectionUncertainty(jecUncUrl.Data());
 
+  /*
 	//pileup weights
-	TString puWgtUrl("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/pileupWgts.root");
-	gSystem->ExpandPathName(puWgtUrl);
-	TFile *fIn=TFile::Open(puWgtUrl);
-	if(fIn){
-	  puWgtGr_     = (TGraph *)fIn->Get("puwgts_nom");
-	  puWgtDownGr_ = (TGraph *)fIn->Get("puwgts_down");
-	  puWgtUpGr_   = (TGraph *)fIn->Get("puwgts_up");
-	  fIn->Close();
+	TString puWgt_nom_Url("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/pileup_weights/Pileup_nom_2018BCDEF.root");
+  TString puWgt_down_Url("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/pileup_weights/Pileup_down_2018BCDEF.root");
+  TString puWgt_up_Url("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/pileup_weights/Pileup_up_2018BCDEF.root");
+	gSystem->ExpandPathName(puWgt_nom_Url);
+	TFile *fIn_nom=TFile::Open(puWgt_nom_Url);
+  gSystem->ExpandPathName(puWgt_down_Url);
+  TFile *fIn_down=TFile::Open(puWgt_down_Url);
+  gSystem->ExpandPathName(puWgt_up_Url);
+  TFile *fIn_up=TFile::Open(puWgt_up_Url);
+	if(fIn_nom){
+	  puWgtGr_     = (TGraph *)fIn_nom->Get("puwgts_nom");
+	  puWgtDownGr_ = (TGraph *)fIn_down->Get("puwgts_down");
+	  puWgtUpGr_   = (TGraph *)fIn_up->Get("puwgts_up");
+	  fIn_nom->Close();
+    fIn_down->Close();
+    fIn_up->Close();
 	}
+  else if(fIn_down){
+	  puWgtDownGr_ = (TGraph *)fIn_down->Get("puwgts_down");
+    fIn_down->Close();
+  }
+  else if(fIn_up){
+	  puWgtUpGr_   = (TGraph *)fIn_up->Get("puwgts_up");
+    fIn_up->Close();
+  }
 	else{
-	  std::cout << "Unable to find data/pileupWgts.root, no PU reweighting will be applied" << std::endl;
-	}
+	  std::cout << "Unable to find pileup wgts file, no PU reweighting will be applied" << std::endl;
+	}*/
       }
   ~TTbarEventAnalysis(){}
   void setReadTTJetsGenWeights(bool readTTJetsGenWeights)     { readTTJetsGenWeights_=readTTJetsGenWeights; }
@@ -57,8 +74,38 @@ class TTbarEventAnalysis
   void addTriggerBit(Int_t bit,Int_t ch)                      { triggerBits_.push_back(std::pair<Int_t,Int_t>(bit,ch)); }
   void addVarForTMVA(TString varName)                         { tmvaVarNames_.push_back(varName); }
   void prepareOutput(TString outFile);
-  void processFile(TString inFile,TH1F *xsecWgt,Bool_t isData);
+  //void processFile(TString inFile,TH1F *xsecWgt,Bool_t isData);
+  Int_t processFile(TString inFile,TH1F *xsecWgt,Bool_t isData);
   void finalizeOutput();
+
+  void SetPUWeightTarget(TString targetFile,TString sampleName){
+
+        TFile *fIn=TFile::Open(targetFile);
+  	    if(fIn){
+          std::string nom("puwgts_nom");
+          std::string up("puwgts_down");
+          std::string down("puwgts_up");
+          if(!sampleName.IsNull()){
+              nom.append("_");
+              nom.append(sampleName);
+              up.append("_");
+              up.append(sampleName);
+              down.append("_");
+              down.append(sampleName);
+          }
+          else{
+            std::cout << "Warning: PUWeight target histogram " << sampleName << " does not exist. Check naming convention of samples matches that of PU histograms." << std::endl;
+          }
+
+  	      puWgtGr_     = (TGraph *)fIn->Get(nom.c_str());
+  	      puWgtDownGr_ = (TGraph *)fIn->Get(down.c_str());
+  	      puWgtUpGr_   = (TGraph *)fIn->Get(up.c_str());
+  	    }
+        else{
+  	      std::cout << "Unable to find pileupWgts.root, no PU reweighting will be applied" << std::endl;
+  	    }
+  	    fIn->Close();
+  	}
 
  private:
   JetCorrectionUncertainty *jecUnc_;
@@ -74,7 +121,7 @@ class TTbarEventAnalysis
   TMVA::Reader *tmvaReader_;
   TFile *outF_;
   Int_t eventInfo_[3],ttbar_chan_,npv_;
-  Float_t weight_[15];
+  Float_t weight_[27];
   Int_t jetFlavour_[2],jetmult_,jetrank_;
   Float_t jetPt_[2],jetEta_[2];
   Float_t close_mlj_[5],close_deta_,close_dphi_,close_ptrel_,close_lj2ll_deta_, close_lj2ll_dphi_;
@@ -82,10 +129,14 @@ class TTbarEventAnalysis
   Float_t  j2ll_deta_,j2ll_dphi_;
   Float_t kinDisc_[5];
   Float_t jp_[2],svhe_[2],csv_[2];
+  Float_t DeepCSVb_[2], DeepCSVc_[2], DeepCSVl_[2], DeepCSVbb_[2], DeepCSVcc_[2], DeepCSVbN_[2], DeepCSVcN_[2], DeepCSVlN_[2], DeepCSVbbN_[2], DeepCSVccN_[2], DeepCSVbP_[2], DeepCSVcP_[2], DeepCSVlP_[2], DeepCSVbbP_[2], DeepCSVccP_[2];
+  Float_t DeepCSVBDisc_[2], DeepCSVBDiscN_[2], DeepCSVBDiscP_[2], DeepCSVCvsLDisc_[2], DeepCSVCvsLDiscN_[2], DeepCSVCvsLDiscP_[2], DeepCSVCvsBDisc_[2], DeepCSVCvsBDiscN_[2], DeepCSVCvsBDiscP_[2];
+  Float_t DeepFlavourBDisc_[2], DeepFlavourCvsLDisc_[2], DeepFlavourCvsBDisc_[2];
+  Float_t DeepFlavourB_[2], DeepFlavourBB_[2], DeepFlavourLEPB_[2];
   std::vector<std::pair<Int_t,Int_t> > triggerBits_;
   TTree *kinTree_,*ftmTree_;
   std::map<TString,TH1F *> histos_;
-  
+
 };
 
 #endif

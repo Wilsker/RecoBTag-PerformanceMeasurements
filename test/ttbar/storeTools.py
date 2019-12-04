@@ -8,7 +8,7 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms//eos/cms'):
     from subprocess import Popen, PIPE
     print 'looking into: '+directory+'...'
 
-    eos_cmd = '/afs/cern.ch/project/eos/installation/0.2.41/bin/eos.select'
+    eos_cmd = '/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select'
     data = Popen([eos_cmd, 'ls', '/eos/cms/'+directory],stdout=PIPE)
     out,err = data.communicate()
 
@@ -29,7 +29,7 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms//eos/cms'):
         stripped_list = [x for x in full_list if mask in x]
         return stripped_list
 
-    ## return 
+    ## return
     return full_list
 
 """
@@ -38,19 +38,22 @@ Loops over a list of samples and produces a cache file to normalize MC
 def produceNormalizationCache(samplesList,inDir,cache,xsecWgts,integLumi):
 
     #loop over samples
-    for tag,sample in samplesList: 
+    for tag,sample in samplesList:
 
-        if sample[1]==1 : 
+        if sample[1]==1 :
             xsecWgts[tag]=None
             continue
 
         if tag in xsecWgts:
             print '[Warning] won\'t override current definition for',tag,'. Use --resetCache option to override'
             continue
-        
 
-        input_list=getEOSlslist(directory=inDir+'/'+tag)            
-        xsec=sample[0]            
+
+        input_list=getEOSlslist(directory=inDir+'/'+tag)
+        # Set cross-section to value in samples json.
+        # To run the non-tt normalisation xsection uncertainty, multiply the xsec for non-tt backgrounds by 30%.
+        xsec=sample[0]*0.7
+        #xsec=sample[0]
         norigEvents=None
         for f in input_list:
             fIn=ROOT.TFile.Open(f)
@@ -71,9 +74,9 @@ def produceNormalizationCache(samplesList,inDir,cache,xsecWgts,integLumi):
 
         if norigEvents:
             print '... %s cross section=%f pb weights sum(initial events)=%3.0f lumi=%3.2f/fb' % (tag,xsec,xsec/norigEvents.GetBinContent(1),integLumi[tag]/1000.)
-            
-        
-    #dump to file    
+
+
+    #dump to file
     cachefile=open(cache,'w')
     pickle.dump(xsecWgts, cachefile, pickle.HIGHEST_PROTOCOL)
     pickle.dump(integLumi, cachefile, pickle.HIGHEST_PROTOCOL)

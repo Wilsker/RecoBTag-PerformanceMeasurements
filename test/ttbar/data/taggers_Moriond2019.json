@@ -1,0 +1,4 @@
+{
+  "DeepFlavourBDisc" : ["Deep Jet Discriminator", "Jet_DeepFlavourBDisc",  0.0494 ,  0.2770 ,  0.7264 , 1.01],
+  "DeepCSVBDisc" : ["Deep CSV Discriminator", "Jet_CSVBDisc",  0.1241 ,  0.4184 ,  0.7527 , 1.01]
+}

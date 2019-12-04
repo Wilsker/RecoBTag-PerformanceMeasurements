@@ -1,0 +1,4 @@
+{
+  "MC13TeV_TTJets_DL_testing" : [87.31,   0, "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1],
+  "MC13TeV_TTJets_DL_training" : [87.31,   0, "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "t#bar{t} DL",          920, false, false, 1]
+}
