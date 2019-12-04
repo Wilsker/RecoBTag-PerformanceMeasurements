@@ -52,8 +52,8 @@ def produceNormalizationCache(samplesList,inDir,cache,xsecWgts,integLumi):
         input_list=getEOSlslist(directory=inDir+'/'+tag)
         # Set cross-section to value in samples json.
         # To run the non-tt normalisation xsection uncertainty, multiply the xsec for non-tt backgrounds by 30%.
-        xsec=sample[0]*0.7
-        #xsec=sample[0]
+        #xsec=sample[0]*0.7
+        xsec=sample[0]
         norigEvents=None
         for f in input_list:
             fIn=ROOT.TFile.Open(f)

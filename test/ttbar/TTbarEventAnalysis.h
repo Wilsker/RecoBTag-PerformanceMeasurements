@@ -3,6 +3,7 @@
 
 #include "TFile.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TString.h"
 #include "TTree.h"
 #include "TSystem.h"
@@ -13,6 +14,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <algorithm>
 
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
@@ -24,52 +26,52 @@ struct LJKinematics_t
 
 bool sortLJKinematicsByDR (LJKinematics_t i,LJKinematics_t j) { return (i.dr<j.dr); }
 
+//prepare to read the tree (for jets only interested in a couple of variables)
+class MyEventInfoBranches_t
+{
+  public:
+    Int_t Run,Evt,LumiBlock,nPV;
+    Int_t   ttbar_chan, ttbar_trigWord, ttbar_metfilterWord;
+    Int_t   ttbar_nl, ttbar_lid[10], ttbar_lgid[10], ttbar_lch[10];
+    Float_t ttbar_lpt[10], ttbar_leta[10], ttbar_lphi[10], ttbar_lm[10];
+    Float_t ttbar_metpt,ttbar_metphi;
+    Float_t ttbar_rho;
+    Int_t   ttbar_nw;
+    Float_t nPUtrue;
+    Int_t nPU;
+    Float_t ttbar_w[1095];
+    Int_t nJet;
+    Float_t Jet_pt[100],Jet_genpt[100],Jet_area[100],Jet_jes[100],Jet_eta[100],Jet_phi[100],Jet_mass[100];
+    Float_t Jet_Svx[100],Jet_CombIVF[100],Jet_Proba[100],Jet_Ip2P[100];
+    Float_t Jet_DeepCSVb[100], Jet_DeepCSVc[100], Jet_DeepCSVl[100], Jet_DeepCSVbN[100], Jet_DeepCSVcN[100], Jet_DeepCSVlN[100];
+    Float_t Jet_DeepCSVBDisc[100],Jet_DeepCSVBDiscN[100],Jet_DeepCSVCvsLDisc[100],Jet_DeepCSVCvsLDiscN[100],Jet_DeepCSVCvsBDisc[100],Jet_DeepCSVCvsBDiscN[100];
+    Float_t Jet_DeepFlavourBDisc[100], Jet_DeepFlavourCvsLDisc[100], Jet_DeepFlavourCvsBDisc[100];
+    Float_t Jet_DeepFlavourB[100];
+    Int_t Jet_nseltracks[100];
+    Int_t Jet_flavour[100];
+};
+
 class TTbarEventAnalysis
 {
  public:
  TTbarEventAnalysis() :
     tmvaReader_(0),
-    readTTJetsGenWeights_(false),
+    readTTJetsGenWeights_(true),
     puWgtGr_(0),puWgtDownGr_(0),puWgtUpGr_(0)
       {
-	//jet uncertainty parameterization
-	TString jecUncUrl("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/Autumn18_V8_MC_Uncertainty_AK4PF.txt");
-	gSystem->ExpandPathName(jecUncUrl);
-	jecUnc_ = new JetCorrectionUncertainty(jecUncUrl.Data());
+  //jet uncertainty parameterization
+  TString jecUncUrl("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/Autumn18_V8_MC_Uncertainty_AK4PF.txt");
+  gSystem->ExpandPathName(jecUncUrl);
+  jecUnc_ = new JetCorrectionUncertainty(jecUncUrl.Data());
 
-  /*
-	//pileup weights
-	TString puWgt_nom_Url("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/pileup_weights/Pileup_nom_2018BCDEF.root");
-  TString puWgt_down_Url("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/pileup_weights/Pileup_down_2018BCDEF.root");
-  TString puWgt_up_Url("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/pileup_weights/Pileup_up_2018BCDEF.root");
-	gSystem->ExpandPathName(puWgt_nom_Url);
-	TFile *fIn_nom=TFile::Open(puWgt_nom_Url);
-  gSystem->ExpandPathName(puWgt_down_Url);
-  TFile *fIn_down=TFile::Open(puWgt_down_Url);
-  gSystem->ExpandPathName(puWgt_up_Url);
-  TFile *fIn_up=TFile::Open(puWgt_up_Url);
-	if(fIn_nom){
-	  puWgtGr_     = (TGraph *)fIn_nom->Get("puwgts_nom");
-	  puWgtDownGr_ = (TGraph *)fIn_down->Get("puwgts_down");
-	  puWgtUpGr_   = (TGraph *)fIn_up->Get("puwgts_up");
-	  fIn_nom->Close();
-    fIn_down->Close();
-    fIn_up->Close();
-	}
-  else if(fIn_down){
-	  puWgtDownGr_ = (TGraph *)fIn_down->Get("puwgts_down");
-    fIn_down->Close();
-  }
-  else if(fIn_up){
-	  puWgtUpGr_   = (TGraph *)fIn_up->Get("puwgts_up");
-    fIn_up->Close();
-  }
-	else{
-	  std::cout << "Unable to find pileup wgts file, no PU reweighting will be applied" << std::endl;
-	}*/
+  //pileup weights
+  TString stdTarget("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/pileupWgts.root");
+  gSystem->ExpandPathName(stdTarget);
+  SetPUWeightTarget(stdTarget,"");
       }
   ~TTbarEventAnalysis(){}
   void setReadTTJetsGenWeights(bool readTTJetsGenWeights)     { readTTJetsGenWeights_=readTTJetsGenWeights; }
+  void setTwoTagCount(bool runTwoTagCount_)                   { runTwoTagAnalysis=runTwoTagCount_; }
   void setTMVAWeightsBaseDir(TString url)                     { weightsDir_=url; gSystem->ExpandPathName(weightsDir_); }
   void addTriggerBit(Int_t bit,Int_t ch)                      { triggerBits_.push_back(std::pair<Int_t,Int_t>(bit,ch)); }
   void addVarForTMVA(TString varName)                         { tmvaVarNames_.push_back(varName); }
@@ -77,6 +79,31 @@ class TTbarEventAnalysis
   //void processFile(TString inFile,TH1F *xsecWgt,Bool_t isData);
   Int_t processFile(TString inFile,TH1F *xsecWgt,Bool_t isData);
   void finalizeOutput();
+  void SetPUWeightTarget(TString targetFile,TString sampleName){
+      TFile *fIn=TFile::Open(targetFile);
+      if(fIn){
+        std::string nom("puwgts_nom");
+        std::string up("puwgts_down");
+        std::string down("puwgts_up");
+        if(!sampleName.IsNull()){
+            nom.append("_");
+            nom.append(sampleName);
+            up.append("_");
+            up.append(sampleName);
+            down.append("_");
+            down.append(sampleName);
+        }else{
+            std::cout << "Warning: PUWeight target histogram " << sampleName << " does not exist. Check naming convention of samples matches that of PU histograms." << std::endl;
+        }
+
+        puWgtGr_     = (TGraph *)fIn->Get(nom.c_str());
+        puWgtDownGr_ = (TGraph *)fIn->Get(down.c_str());
+        puWgtUpGr_   = (TGraph *)fIn->Get(up.c_str());
+      }else{
+        std::cout << "Unable to find data/pileupWgts.root, no PU reweighting will be applied" << std::endl;
+      }
+      fIn->Close();
+  }
 
   void SetPUWeightTarget(TString targetFile,TString sampleName){
 
@@ -114,6 +141,23 @@ class TTbarEventAnalysis
   std::vector<float> getJetEnergyScales(float pt,float eta,float rawsf,float area,float rho);
   std::vector<float> getJetResolutionScales(float pt, float eta, float genjpt);
 
+  MyEventInfoBranches_t ev;
+  std::vector<Int_t> selJets;
+  Float_t evWgt;
+
+  std::vector<std::string> wpLabel;
+  std::vector<std::string> systName;
+  std::map<std::string,double> systWeight;
+
+  void TwoTag(std::string tagName, std::string discriminator, std::pair<int, int>, int ptBin);
+  std::map<std::string,std::vector<float>> btaggingWPs;
+  void GetBestJetPair(std::pair<int, int>& myIndices, std::string discriminator="deepCSV");
+  std::map<std::string,std::pair<int, int>> bestJetPairs;
+  float ReturnVarAtIndex(std::string varName, unsigned int index);
+  std::string ReturnPtLabel(int iPT);
+  std::vector<unsigned int> lowerPtBinEdges;
+  std::vector<std::string> twoTagNames;
+
   TGraph *puWgtGr_,*puWgtDownGr_,*puWgtUpGr_;
   bool readTTJetsGenWeights_;
   TString weightsDir_;
@@ -136,6 +180,9 @@ class TTbarEventAnalysis
   std::vector<std::pair<Int_t,Int_t> > triggerBits_;
   TTree *kinTree_,*ftmTree_;
   std::map<TString,TH1F *> histos_;
+  std::map<TString,TH2F *> histos2d_;
+  bool noEventsSelected;
+  unsigned int runTwoTagAnalysis;
 
 };
 

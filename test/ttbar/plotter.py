@@ -23,6 +23,7 @@ class Plot(object):
         self.plotformats = ['pdf','png']
         self.savelog = False
         self.ratiorange = (0.46,1.54)
+        #self.ratiorange = (0.75,1.25)
 
     def add(self, h, title, color, isData,isSyst):
         # Set title to name of process
@@ -124,7 +125,7 @@ class Plot(object):
         p1.cd()
 
         # legend
-        leg = ROOT.TLegend(0.5, 0.75-0.03*max(len(self.mc)-2,0), 0.98, 0.9)
+        leg = ROOT.TLegend(0.5, 0.80-0.03*max(len(self.mc)-2,0), 0.98, 0.9)
         leg.SetBorderSize(0)
         leg.SetFillStyle(0)
         leg.SetTextFont(43)
@@ -195,7 +196,12 @@ class Plot(object):
         if self.dataH is not None:
             if maxY < self.dataH.GetMaximum():
                 maxY=self.dataH.GetMaximum()
-        print 'maxY: ', maxY
+        if totalMC and self.dataH:
+            print self.name,"data, MC, data/MC",self.dataH.Integral(),totalMC.Integral(),
+            if totalMC.Integral()>0:
+                print self.dataH.Integral()/totalMC.Integral(),
+            print
+
         frame.GetYaxis().SetRangeUser(0.1,maxY*1.3)
         frame.SetDirectory(0)
         frame.Reset('ICE')
@@ -241,7 +247,26 @@ class Plot(object):
         p2.cd()
         ratioframe=frame.Clone('ratioframe')
         ratioframe.GetYaxis().SetTitle('Data/MC')
-        ratioframe.GetYaxis().SetRangeUser(self.ratiorange[0], self.ratiorange[1])
+        maxVal=0
+        minVal=10
+        dataOverMC=self.dataH.Clone("dataOverMC")
+        print "integrals",dataOverMC.GetName(),totalMC.GetName(),dataOverMC.Integral(),totalMC.Integral()
+        dataOverMC.Divide(totalMC)
+        for xBin in xrange(1,dataOverMC.GetXaxis().GetNbins()+1):
+            thisValue=dataOverMC.GetBinContent(xBin)
+            if thisValue==0:
+                continue
+            #print xBin,thisValue
+            if maxVal<thisValue:
+                maxVal=thisValue
+            if minVal>thisValue:
+                minVal=thisValue
+
+        print "maxVal,minVal,",maxVal,minVal
+        print "range",max(self.ratiorange[0],minVal*0.95), min(self.ratiorange[1],maxVal*1.05)
+
+        ratioframe.GetYaxis().SetRangeUser(max(self.ratiorange[0],minVal*0.95), min(self.ratiorange[1],maxVal*1.05))
+        #ratioframe.GetYaxis().SetRangeUser(self.ratiorange[0], self.ratiorange[1])
         self._garbageList.append(frame)
         ratioframe.GetYaxis().SetNdivisions(6)
         ratioframe.GetYaxis().SetLabelSize(0.18)
@@ -414,6 +439,7 @@ def main():
     parser.add_option('-l', '--lumi',        dest='lumi' ,       help='lumi to print out',              default=58298.258,    type=float)
     #parser.add_option('-l', '--lumi',        dest='lumi' ,       help='lumi to print out',              default=52041.789,    type=float)
     parser.add_option(      '--only',        dest='only',        help='plot only these (csv)',          default='',      type='string')
+    parser.add_option(      '--outLabel',    dest='outLabel',    help='appends the plots dir name',     default='',      type='string')
     (opt, args) = parser.parse_args()
 
     #read list of samples
@@ -434,12 +460,15 @@ def main():
         if slist is None : continue
         for tag,sample in slist:
 
-            if isSyst and not 't#bar{t}' in sample[3] : continue
+            if isSyst and not 't#bar{t}' in sample[3] :
+                print "Skipping syst sample",sample
+                continue
 
             inDir=opt.inDir
             if isSyst : inDir += '/syst'
-            
+
             fIn=ROOT.TFile.Open('%s/%s.root' % ( inDir, tag) )
+            print "opening ",'%s/%s.root' % ( inDir, tag)
             try:
                 #Loop over histograms
                 for tkey in fIn.GetListOfKeys():
@@ -465,6 +494,8 @@ def main():
     ROOT.gStyle.SetOptStat(0)
     ROOT.gROOT.SetBatch(True)
     outDir=opt.inDir+'/plots'
+    if opt.outLabel:
+        outDir=outDir+"_"+opt.outLabel
     os.system('mkdir -p %s' % outDir)
     for p in plots :
         if opt.saveLog    : plots[p].savelog=True

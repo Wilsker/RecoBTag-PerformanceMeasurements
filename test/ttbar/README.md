@@ -1,7 +1,5 @@
-# KIN Method Instructions
-## Moriond 2018 Campaign
-## Joshuha Thomas-Wilsker
-## IHEP CAS
+# TTBarCalib Instructions
+## Joshuha Thomas-Wilsker (IHEP CAS) & Chris Palmer (Princeton)
 
 The following instructions will explain practically how to perform the KIN method analysis. The instructions should provide you with all the information needed to go from collecting a list of samples required for this analysis and running the BTagAnalyzer to extracting the KIN method scale factors and uncertainties and creating the .csv files that are used in the BTV b-tagging scale factors combination. Firstly we need to create a CMSSW working directory and env. Check BTagAnalyzer page for which CMSSW to use for new campaigns and follow the setup instructions in the relevant github README:
 ```
@@ -248,6 +246,25 @@ Things to check:
   JEC Uncertainty sources, explanations and the <version for your data> can be found at https://twiki.cern.ch/twiki/bin/view/CMS/JECUncertaintySources
   Are you using the correct pileup reweighting file: look for 'puWgtUrl' variable?
   Ensure triggers are set up correctly. Do this in both .h and .cc files
+
+### Running local analysis for 2TagCount
+After b-tag analyzer trees are produced, the first two steps of the 2TagCount analysis are the same.  The first is to run the analysis and make histograms (and trees):
+```
+python runTTbarAnalysis.py -i /store/group/phys_btag/Commissioning/TTbar/Moriond19_2018_StructuredDir/ --json data/samples_Run2018.json -o /tmp/MYUSERNAME/Moriond19_Run2018 -n 70 --doTwoTag 1
+```
+
+Re-organize plots and make data, mc comparison canvases (inclusive 2TagCount plots are in):
+```
+python plotter.py -i /tmp/MYUSERNAME/Moriond19_Run2018 --json data/samples_Run2018.json --lumi 58000
+```
+
+Take the 2TagCount histograms and compute efficiency scale factor comparing the following: 1)  b-tagging effiency for each working point for events with two b-jets at truth level (MC eff) and 2) data minus non-double b-jet MC divided by the number of MC events with two matched particle level b-jets:
+```
+python twoTag.py /tmp/MYUSERNAME/Moriond19_Run2018/plots/plotter.root
+```
+
+
+### Performance analyses
 
 - Modifications to TTbarEventAnalysis.cc:
   Check trigger and letpon SFs
