@@ -71,11 +71,6 @@ void TTbarEventAnalysis::prepareOutput(TString outFile)
   kinTree_->Branch("DeepFlavourB",            &(DeepFlavourB_[0]),           "DeepFlavourB/F");
   kinTree_->Branch("DeepFlavourBB",            &(DeepFlavourBB_[0]),           "DeepFlavourBB/F");
   kinTree_->Branch("DeepFlavourLEPB",            &(DeepFlavourLEPB_[0]),           "DeepFlavourLEPB/F");
-<<<<<<< HEAD
-
-  //kinTree_->Branch("weight",         weight_,          "weight[15]/F");
-=======
->>>>>>> 73e732f9e11f8a71732785aefbd2be46fd695a5c
   kinTree_->Branch("weight",         weight_,          "weight[26]/F");
 
   ftmTree_=new TTree("ftm","flavour tag matching");
@@ -89,10 +84,6 @@ void TTbarEventAnalysis::prepareOutput(TString outFile)
   ftmTree_->Branch("jp",             jp_,         "jp[2]/F");
   ftmTree_->Branch("svhe",           svhe_,       "svhe[2]/F");
   ftmTree_->Branch("csv",            csv_,        "csv[2]/F");
-<<<<<<< HEAD
-
-=======
->>>>>>> 73e732f9e11f8a71732785aefbd2be46fd695a5c
   ftmTree_->Branch("DeepCSVb",               DeepCSVb_,        "DeepCSVb[2]/F");
   ftmTree_->Branch("DeepCSVc",               DeepCSVc_,        "DeepCSVc[2]/F");
   ftmTree_->Branch("DeepCSVl",               DeepCSVl_,        "DeepCSVl[2]/F");
@@ -118,10 +109,6 @@ void TTbarEventAnalysis::prepareOutput(TString outFile)
   ftmTree_->Branch("DeepCSVCvsBDisc",               DeepCSVCvsBDisc_,        "DeepCSVCvsBDisc[2]/F");
   ftmTree_->Branch("DeepCSVCvsBDiscN",               DeepCSVCvsBDiscN_,        "DeepCSVCvsBDiscN[2]/F");
   ftmTree_->Branch("DeepCSVCvsBDiscP",               DeepCSVCvsBDiscP_,        "DeepCSVCvsBDiscP[2]/F");
-<<<<<<< HEAD
-
-=======
->>>>>>> 73e732f9e11f8a71732785aefbd2be46fd695a5c
   ftmTree_->Branch("kindisc",        kinDisc_,    "kindisc[2]/F");
   //ftmTree_->Branch("weight",         weight_,     "weight[15]/F");
   ftmTree_->Branch("weight",         weight_,     "weight[26]/F");
