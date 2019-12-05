@@ -172,7 +172,7 @@ def main():
 
     #read normalization
     xsecWgts, integLumi = {}, {}
-    cache='%s/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/.xsecweights.pck'%os.environ['CMSSW_BASE']
+    cache='%s/src/TTBarCalibCode/test/ttbar/data/.xsecweights.pck'%os.environ['CMSSW_BASE']
     try:
         cachefile = open(cache, 'r')
         xsecWgts  = pickle.load(cachefile)
