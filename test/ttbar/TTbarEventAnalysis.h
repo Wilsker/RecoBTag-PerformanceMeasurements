@@ -60,12 +60,12 @@ class TTbarEventAnalysis
     puWgtGr_(0),puWgtDownGr_(0),puWgtUpGr_(0)
       {
   //jet uncertainty parameterization
-  TString jecUncUrl("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/Autumn18_V8_MC_Uncertainty_AK4PF.txt");
+  TString jecUncUrl("${CMSSW_BASE}/src/TTBarCalibCode/test/ttbar/data/Autumn18_V8_MC_Uncertainty_AK4PF.txt");
   gSystem->ExpandPathName(jecUncUrl);
   jecUnc_ = new JetCorrectionUncertainty(jecUncUrl.Data());
 
   //pileup weights
-  TString stdTarget("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/pileupWgts.root");
+  TString stdTarget("${CMSSW_BASE}/src/TTBarCalibCode/test/ttbar/data/pileupWgts.root");
   gSystem->ExpandPathName(stdTarget);
   SetPUWeightTarget(stdTarget,"");
       }

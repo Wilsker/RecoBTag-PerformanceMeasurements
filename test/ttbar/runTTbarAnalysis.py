@@ -97,13 +97,15 @@ def RunJobs(task_list,nJobs):
         pool.map(runTTbarAnalysisPacked, task_list)
 
 def InspectFiles(outputDir,runTags):
+    # Tags = sample title in samples.json
     zero=0
     tiny=0
     norm=0
-
+    print 'InspectFiles'
     okFiles=[]
     bustedFiles=[]
     for tag in runTags:
+        # Check if output for file exists
         os.system('ls -l %s/%s_*.root > %s.txt' % (outputDir,tag,tag) )
         sizeFile=open('%s.txt' % (tag))
         linesofls=sizeFile.readlines()
