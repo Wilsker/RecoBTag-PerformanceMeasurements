@@ -358,7 +358,7 @@ void TTbarEventAnalysis::prepareOutput(TString outFile)
 //
 Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isData)
 {
-  cout << "xsecWgt = " << xsecWgt << endl;
+
   //loop over events
   TFile *inF=TFile::Open(inFile);
   TTree *tree=(TTree *)inF->Get("btagana/ttree");
@@ -441,7 +441,8 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
     int n1=0;
     int n2=0;
     int n3=0;
-    for(Int_t i=0; i<nentries; i++){
+    //for(Int_t i=0; i<nentries; i++){
+      for(Int_t i=0; i<1000; i++){
         tree->GetEntry(i);
 
 
@@ -531,9 +532,9 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         if(!isData){
             evWgt *= puWgtNom*trigWgtNom*lepSelEffNom*genWgt;
             if(xsecWgt) evWgt *= xsecWgt->GetBinContent(1);
-            if(evWgt<0) {
-                std::cout<<"ev.nPUtrue ev.nPU evWgt "<<ev.nPUtrue<<" "<<ev.nPU<<" "<<evWgt<<std::endl;
-            }
+            /*if(evWgt<0) {
+                std::cout<<"ev.nPUtrue: "<<ev.nPUtrue<<", ev.nPU: "<<ev.nPU<<", evWgt: "<<evWgt<<std::endl;
+            }*/
         }
         //std::cout<<"go go 001"<<i<<std::endl;
         if(readTTJetsGenWeights_ && ev.ttbar_nw>17) {
