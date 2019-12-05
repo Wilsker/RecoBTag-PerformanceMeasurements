@@ -10,7 +10,6 @@ def getEOSlslist(directory, mask='', prepend='root://eoscms.cern.ch'):
     print 'looking into: '+directory+'...'
     eos_dir = '/eos/cms/%s'%(directory)
     eos_cmd = 'eos ' + prepend + ' ls ' + eos_dir
-    print 'eos_cmd: ', eos_cmd
     out = commands.getoutput(eos_cmd)
     full_list = []
     ## if input file was single root file:

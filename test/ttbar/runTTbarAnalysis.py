@@ -64,8 +64,6 @@ def runTTbarAnalysis(inFile, outFile, wgt, tmvaWgts=None,isData=False):
     if not (tmvaWgts is None) : evAnalysis.setTMVAWeightsBaseDir(tmvaWgts)
     evAnalysis.prepareOutput(ROOT.TString(outFile))
     print 'Checking file %s is good . . .' % (ROOT.TString(inFile))
-    print 'wgt: ', wgt
-    print 'isData: ', isData
     file_good = evAnalysis.processFile(ROOT.TString(inFile),wgt,isData)
     if file_good == 1:
         print 'file_good == 1 (is good)'
