@@ -441,8 +441,7 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
     int n1=0;
     int n2=0;
     int n3=0;
-    //for(Int_t i=0; i<nentries; i++){
-      for(Int_t i=0; i<1000; i++){
+    for(Int_t i=0; i<nentries; i++){
         tree->GetEntry(i);
 
 
@@ -1036,7 +1035,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         }
     }
 
-    std::cout<<"n1 n2 n3 n2/n1 n3/n1 "<<n1<<" "<<n2<<" "<<float(n2)/float(n1)<<" "<<float(n3)/float(n1)<<std::endl;
     this->noEventsSelected=(nSkipped==nentries);
 
     //all done with this file
