@@ -363,11 +363,15 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
   TFile *inF=TFile::Open(inFile);
   TTree *tree=(TTree *)inF->Get("btagana/ttree");
   Int_t nentries=tree->GetEntriesFast();
-  std::cout << "...opening " << inFile << " -> analysing " << nentries << " events -> " << outF_->GetName();
+  std::cout << "...opening " << inFile << " -> analysing " << nentries << " events -> " << outF_->GetName() << endl;
 
   if (nentries == 0){
     inF->Close();
+    cout << "THERE AINT A GOD DAMN THING IN HERE!" << endl;
     return 0;
+  }
+  else{
+    cout << "ENTRIES: " << nentries << endl;
   }
 
   //prepare reader
@@ -438,16 +442,10 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
     tree->SetBranchAddress("Jet_DeepFlavourB", ev.Jet_DeepFlavourB);
 
     int nSkipped=0;
-    int n1=0;
-    int n2=0;
-    int n3=0;
     for(Int_t i=0; i<nentries; i++){
         tree->GetEntry(i);
-
-
         //progress bar
-        if(i%100==0) std::cout << "\r[ " << int(100.*i/nentries) << "/100 ] to completion" << std::flush;
-
+        //if(i%100==0) std::cout << "\r[ " << int(100.*i/nentries) << "/100 ] to completion" << std::flush;
 
         //pileup weights
         Float_t puWgtLo(1.0), puWgtNom(1.0), puWgtHi(1.0);
@@ -459,7 +457,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
             if(puWgtLo <0)   puWgtLo  = 0;
             if(puWgtHi <0)   puWgtHi  = 0;
         }
-        //std::cout<<"go go 003"<<i<<std::endl;
         histos_["puwgtnorm" ]->Fill(0.,1.0);
         histos_["puwgtnorm" ]->Fill(1.,puWgtNom);
         histos_["puwgtnorm" ]->Fill(2.,puWgtLo);
@@ -521,8 +518,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         if(lp4[1].Pt()<20) continue;
         if(mll<90) continue;
 
-        n1++;
-
         //nominal event weight
         evWgt=1.0;
         //generator level weights
@@ -531,9 +526,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         if(!isData){
             evWgt *= puWgtNom*trigWgtNom*lepSelEffNom*genWgt;
             if(xsecWgt) evWgt *= xsecWgt->GetBinContent(1);
-            /*if(evWgt<0) {
-                std::cout<<"ev.nPUtrue: "<<ev.nPUtrue<<", ev.nPU: "<<ev.nPU<<", evWgt: "<<evWgt<<std::endl;
-            }*/
         }
         //std::cout<<"go go 001"<<i<<std::endl;
         if(readTTJetsGenWeights_ && ev.ttbar_nw>17) {
@@ -566,13 +558,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
             systWeight["isrConLo"] = evWgt*ev.ttbar_w[1092]/genWgt*(xsecWgt->GetBinContent(1093)/xsecWgt->GetBinContent(1));
             systWeight["fsrConLo"] = evWgt*ev.ttbar_w[1093]/genWgt*(xsecWgt->GetBinContent(1094)/xsecWgt->GetBinContent(1));
         }
-
-        //std::cout<<"nom weight "<<evWgt<<std::endl;
-        //for(unsigned int iSyst=0; iSyst<systName.size(); iSyst++){
-        //    std::cout<<systName[iSyst]<<" "<<systWeight[systName[iSyst]]<<std::endl;
-        //}
-        //usleep(5e6);
-
 
         histos_[ch+"_npvinc"]->Fill(ev.nPV-1,evWgt);
         npv_=ev.nPV;
@@ -706,15 +691,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         bestJetPairs["deepFlavour"]=bestDeepFlavourPair;
         bestJetPairs["deepCSV"]=bestDeepCSVPair;
 
-        n2++;
-        //bool twoDeepCSVJets=(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]]>0 && ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]]>0);
-        //if(!twoDeepCSVJets) {
-        //    //std::cout<<"bestDeepCSVPair.first second deepcsvs "<<bestDeepCSVPair.first<<" "<<bestDeepCSVPair.second<<" "<<ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]]<<" "<<ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]]<<" "<<(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]]<0)<<" "<<(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]]<0)<<std::endl;
-        //    continue;
-        //}
-        n3++;
-
-
         if(!passMet) continue;
         histos_[ch+"_evsel"]->Fill(0.,evWgt);
         if(selJets.size()<5)   histos_[ch+"_evsel"]->Fill(selJets.size()-1,evWgt);
@@ -761,13 +737,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
             deepCSVWPs.push_back(0.7527);
             btaggingWPs["deepCSV"]=deepCSVWPs;
 
-            //std::vector<float> CSVv2WPs;
-            //CSVv2WPs.clear();
-            //CSVv2WPs.push_back(0.5803); //2017
-            //CSVv2WPs.push_back(0.8838);
-            //CSVv2WPs.push_back(0.9693);
-            //btaggingWPs["CSVv2"]=CSVv2WPs;
-
             std::vector<float> deepFlavourWPs;
             deepFlavourWPs.clear();
             deepFlavourWPs.push_back(0.0494); //2018
@@ -775,10 +744,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
             deepFlavourWPs.push_back(0.7264);
             btaggingWPs["deepFlavour"]=deepFlavourWPs;
         }
-
-        //histos_[ch+"_deepcsvlead"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]],evWgt);
-        //histos_[ch+"_deepcsvsublead"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]],evWgt);
-
 
         // The key for btaggingWPs is the name of the discriminators whose WPs we want to measure
         // That label is in all the parts (hist name, key of di-jet pair map and discriminator map).
@@ -795,25 +760,19 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         histos_[ch+"_deepcsv1"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]],evWgt);
         histos_[ch+"_deepcsv2"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]],evWgt);
         histos2d_[ch+"_deepcsv2d"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]],ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]],evWgt);
-        //std::cout<<"go go 012"<<i<<std::endl;
 
-
-        //std::cout<<"go go 013"<<i<<std::endl;
         if(selJets.size()==2){
             histos_[ch+"_only2_deepcsv1"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]],evWgt);
             histos_[ch+"_only2_deepcsv2"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]],evWgt);
             histos2d_[ch+"_only2_deepcsv2d"]->Fill(ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.first]],ev.Jet_DeepCSVBDisc[selJets[bestDeepCSVPair.second]],evWgt);
         }
-        //std::cout<<"go go 014"<<i<<std::endl;
 
         histos_[ch+"_deepflavour1"]->Fill(ev.Jet_DeepFlavourBDisc[selJets[bestDeepFlavourPair.first]],evWgt);
-        //std::cout<<"go go 014.1"<<i<<std::endl;
         histos_[ch+"_deepflavour2"]->Fill(ev.Jet_DeepFlavourBDisc[selJets[bestDeepFlavourPair.second]],evWgt);
         if(selJets.size()==2){
             histos_[ch+"_only2_deepflavour1"]->Fill(ev.Jet_DeepFlavourBDisc[selJets[bestDeepFlavourPair.first]],evWgt);
             histos_[ch+"_only2_deepflavour2"]->Fill(ev.Jet_DeepFlavourBDisc[selJets[bestDeepFlavourPair.second]],evWgt);
         }
-
 
         std::vector<float> leadingkindisc(2,-9999);
         std::vector<int> leadingkindiscIdx(2,-1);
@@ -946,7 +905,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
         //fill trees
         for(size_t ij=0; ij<selJets.size(); ij++) {
             Int_t jetIdx(selJets[ij]);
-
             jetrank_ = ij;
             jetFlavour_[0] = ev.Jet_flavour[jetIdx];
             jetPt_[0]      = selJetsP4[ij][0].Pt();
@@ -1027,9 +985,6 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
                 DeepFlavourCvsLDisc_[ij] = ev.Jet_DeepFlavourCvsLDisc[jetIdx];
                 DeepFlavourCvsBDisc_[ij] = ev.Jet_DeepFlavourCvsBDisc[jetIdx];
                 DeepFlavourB_[ij] = ev.Jet_DeepFlavourB[jetIdx];
-                //std::cout << ij << " " <<  jetFlavour_[ij] << " "
-                //<< jetPt_[ij] << " " << csv_[ij]  << " " << kinDisc_[ij]
-                //    << std::endl;
             }
             ftmTree_->Fill();
         }
@@ -1038,7 +993,9 @@ Int_t TTbarEventAnalysis::processFile(TString inFile,TH1F *xsecWgt, Bool_t isDat
     this->noEventsSelected=(nSkipped==nentries);
 
     //all done with this file
+    cout << "Close file" << endl;
     inF->Close();
+    return 1;
 }
 
 void TTbarEventAnalysis::GetBestJetPair(std::pair<int, int>& myIndices, std::string discriminator){
